@@ -1,0 +1,505 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}🌸 自動販売機 - Vending Machine{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-image: url('{% static "shop/images/vending-bg.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    
+    .page-title {
+        font-family: 'Noto Serif JP', serif;
+        color: var(--sakura-pink);
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 3rem;
+        text-shadow: 0 0 30px rgba(255, 183, 197, 0.8);
+        font-weight: 900;
+        letter-spacing: 3px;
+    }
+    
+    .vending-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2.5rem;
+    }
+    
+    .products-section {
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.25) 0%, rgba(255, 212, 229, 0.15) 100%);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 30px;
+        padding: 2.5rem;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 0 40px rgba(255, 183, 197, 0.3);
+    }
+    
+    .category-title {
+        font-family: 'Noto Serif JP', serif;
+        color: var(--sakura-pink);
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        text-shadow: 0 0 15px rgba(255, 183, 197, 0.8);
+        letter-spacing: 3px;
+        font-weight: 900;
+    }
+    
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .product-card {
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.3) 0%, rgba(255, 212, 229, 0.2) 100%);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 20px;
+        padding: 1.8rem;
+        text-align: center;
+        transition: all 0.4s ease;
+        cursor: pointer;
+        position: relative;
+        backdrop-filter: blur(10px);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-8px) scale(1.05);
+        border-color: var(--sakura-dark);
+        box-shadow: 0 15px 40px rgba(255, 183, 197, 0.5);
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.4) 0%, rgba(255, 212, 229, 0.3) 100%);
+    }
+    
+    .product-card.selected {
+        border-color: var(--gold);
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(255, 183, 197, 0.3) 100%);
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .product-id {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: var(--sakura-pink);
+        color: var(--navy-blue);
+        padding: 0.4rem 1rem;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        box-shadow: 0 0 15px rgba(255, 183, 197, 0.6);
+    }
+    
+    .product-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 0 15px rgba(255, 183, 197, 0.5));
+    }
+    
+    .product-name {
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+    
+    .product-price {
+        color: var(--sakura-pink);
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0.8rem 0;
+        text-shadow: 0 0 10px rgba(255, 183, 197, 0.6);
+    }
+    
+    .product-stock {
+        color: var(--sakura-light);
+        font-size: 0.95rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .out-of-stock {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+    
+    .out-of-stock::after {
+        content: '完売';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-15deg);
+        background: var(--sakura-dark);
+        color: white;
+        padding: 0.8rem 2rem;
+        font-weight: bold;
+        font-size: 1.3rem;
+        border: 3px solid white;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+    }
+    
+    .control-panel {
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.3) 0%, rgba(255, 212, 229, 0.2) 100%);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 30px;
+        padding: 2.5rem;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 0 40px rgba(255, 183, 197, 0.3);
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+    
+    .panel-title {
+        font-family: 'Noto Serif JP', serif;
+        color: var(--sakura-pink);
+        font-size: 1.3rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        text-shadow: 0 0 15px rgba(255, 183, 197, 0.8);
+        font-weight: 900;
+        letter-spacing: 2px;
+    }
+    
+    .display-screen {
+        background: rgba(26, 26, 62, 0.9);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 15px;
+        padding: 1.8rem;
+        margin-bottom: 2rem;
+        min-height: 180px;
+        max-height: 220px;
+        font-family: 'Courier New', monospace;
+        color: var(--sakura-pink);
+        box-shadow: inset 0 0 30px rgba(255, 183, 197, 0.2);
+        overflow-y: auto;
+    }
+    
+    .display-line {
+        margin: 0.6rem 0;
+        animation: fadeIn 0.4s ease;
+        text-shadow: 0 0 5px rgba(255, 183, 197, 0.5);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    
+    .form-group label {
+        display: block;
+        color: var(--sakura-pink);
+        font-weight: bold;
+        margin-bottom: 0.8rem;
+        font-size: 1rem;
+        letter-spacing: 1px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(26, 26, 62, 0.8);
+        border: 2px solid var(--sakura-pink);
+        border-radius: 10px;
+        color: white;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--sakura-dark);
+        box-shadow: 0 0 20px rgba(255, 183, 197, 0.4);
+    }
+    
+    .denomination-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.8rem;
+        margin-top: 1rem;
+    }
+    
+    .denom-btn {
+        padding: 1rem;
+        background: rgba(255, 183, 197, 0.2);
+        border: 2px solid var(--sakura-pink);
+        border-radius: 10px;
+        color: var(--sakura-pink);
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .denom-btn:hover {
+        background: var(--sakura-pink);
+        color: var(--navy-blue);
+        transform: scale(1.1);
+        box-shadow: 0 5px 20px rgba(255, 183, 197, 0.5);
+    }
+    
+    .btn-vending {
+        width: 100%;
+        padding: 1.3rem;
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 15px;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        letter-spacing: 2px;
+        margin-top: 1.5rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-vending:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(255, 183, 197, 0.6);
+        background: linear-gradient(135deg, var(--sakura-dark) 0%, var(--sakura-deep) 100%);
+    }
+    
+    .btn-vending:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    @media (max-width: 968px) {
+        .vending-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .control-panel {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">🌸 自動販売機 VENDING MACHINE 🌸</h1>
+
+<div class="vending-container">
+    <div class="products-section">
+        <h2 class="category-title">🍰 お菓子 CAKES</h2>
+        <div class="products-grid">
+            {% for product in cakes %}
+            <div class="product-card {% if not product.is_available %}out-of-stock{% endif %}" 
+                 data-id="{{ product.product_id }}"
+                 data-name="{{ product.name }}"
+                 data-price="{{ product.price }}"
+                 data-stock="{{ product.quantity }}"
+                 data-note="{{ forloop.counter0 }}">
+                <span class="product-id">{{ product.product_id }}</span>
+                <div class="product-icon">🍰</div>
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-price">Rs {{ product.price }}</div>
+                <div class="product-stock">在庫: {{ product.quantity }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <h2 class="category-title">🥤 飲み物 DRINKS</h2>
+        <div class="products-grid">
+            {% for product in drinks %}
+            <div class="product-card {% if not product.is_available %}out-of-stock{% endif %}"
+                 data-id="{{ product.product_id }}"
+                 data-name="{{ product.name }}"
+                 data-price="{{ product.price }}"
+                 data-stock="{{ product.quantity }}"
+                 data-note="{{ forloop.counter0 }}">
+                <span class="product-id">{{ product.product_id }}</span>
+                <div class="product-icon">🥤</div>
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-price">Rs {{ product.price }}</div>
+                <div class="product-stock">在庫: {{ product.quantity }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="control-panel">
+        <h3 class="panel-title">🌸 操作パネル 🌸</h3>
+        
+        <div class="display-screen" id="displayScreen">
+            <div class="display-line">>>> ようこそ Welcome</div>
+            <div class="display-line">>>> 商品を選んでください</div>
+            <div class="display-line">>>> Select a product</div>
+        </div>
+        
+        <form id="vendingForm">
+            {% csrf_token %}
+            <input type="hidden" id="productId" name="product_id">
+            
+            <div class="form-group">
+                <label>💰 お金を入れる Insert Money (Rs)</label>
+                <input type="number" class="form-control" id="moneyInserted" name="money_inserted" placeholder="金額を入力" required>
+                <div class="denomination-grid">
+                    {% for denom in valid_denominations %}
+                    <button type="button" class="denom-btn clickable" data-value="{{ denom }}" data-note="{{ forloop.counter0 }}">Rs {{ denom }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>📦 数量 Quantity</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
+            </div>
+            
+            <button type="submit" class="btn-vending clickable" id="purchaseBtn" data-note="4" disabled>🎰 購入 PURCHASE</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedProduct = null;
+    const displayScreen = document.getElementById('displayScreen');
+    const vendingForm = document.getElementById('vendingForm');
+    const purchaseBtn = document.getElementById('purchaseBtn');
+    const productIdInput = document.getElementById('productId');
+    const moneyInput = document.getElementById('moneyInserted');
+    const quantityInput = document.getElementById('quantity');
+    
+    function addDisplayLine(text) {
+        const line = document.createElement('div');
+        line.className = 'display-line';
+        line.textContent = '>>> ' + text;
+        displayScreen.appendChild(line);
+        displayScreen.scrollTop = displayScreen.scrollHeight;
+    }
+    
+    function clearDisplay() {
+        displayScreen.innerHTML = '';
+    }
+    
+    // Product selection
+    document.querySelectorAll('.product-card:not(.out-of-stock)').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            selectedProduct = {
+                id: this.dataset.id,
+                name: this.dataset.name,
+                price: parseFloat(this.dataset.price),
+                stock: parseInt(this.dataset.stock)
+            };
+            
+            productIdInput.value = selectedProduct.id;
+            clearDisplay();
+            addDisplayLine(`選択 Selected: ${selectedProduct.name}`);
+            addDisplayLine(`価格 Price: Rs ${selectedProduct.price}`);
+            addDisplayLine(`在庫 Stock: ${selectedProduct.stock}`);
+            addDisplayLine('お金を入れてください Insert money');
+            
+            purchaseBtn.disabled = false;
+        });
+    });
+    
+    // Denomination buttons
+    document.querySelectorAll('.denom-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            moneyInput.value = this.dataset.value;
+        });
+    });
+    
+    // Form submission
+    vendingForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!selectedProduct) {
+            alert('商品を選んでください！ Please select a product!');
+            return;
+        }
+        
+        const formData = new FormData(this);
+        purchaseBtn.disabled = true;
+        purchaseBtn.textContent = '処理中 PROCESSING...';
+        
+        fetch('{% url "process_purchase" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            clearDisplay();
+            
+            if (data.success) {
+                addDisplayLine('✓ 購入成功！ SUCCESS!');
+                addDisplayLine(data.message);
+                addDisplayLine(`お釣り Change: Rs ${data.change}`);
+                
+                if (data.change_breakdown && data.change_breakdown.length > 0) {
+                    addDisplayLine('お釣り内訳 Change breakdown:');
+                    data.change_breakdown.forEach(item => {
+                        addDisplayLine(`  Rs ${item.denomination} x ${item.count}`);
+                    });
+                }
+                
+                addDisplayLine(`残り在庫 Stock left: ${data.stock_left}`);
+                
+                // Update stock display
+                const card = document.querySelector(`[data-id="${selectedProduct.id}"]`);
+                if (card) {
+                    card.dataset.stock = data.stock_left;
+                    card.querySelector('.product-stock').textContent = `在庫: ${data.stock_left}`;
+                    
+                    if (data.stock_left === 0) {
+                        card.classList.add('out-of-stock');
+                        card.classList.remove('selected');
+                    }
+                }
+                
+                // Reset form
+                moneyInput.value = '';
+                quantityInput.value = 1;
+                selectedProduct = null;
+                productIdInput.value = '';
+                document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+                
+                setTimeout(() => {
+                    addDisplayLine('別の商品を選ぶか終了');
+                    addDisplayLine('Select another or exit');
+                }, 1000);
+            } else {
+                addDisplayLine('✗ 購入失敗 FAILED');
+                addDisplayLine(data.message);
+            }
+            
+            purchaseBtn.disabled = false;
+            purchaseBtn.textContent = '🎰 購入 PURCHASE';
+        })
+        .catch(error => {
+            clearDisplay();
+            addDisplayLine('✗ エラー ERROR');
+            addDisplayLine('もう一度お試しください Try again');
+            console.error('Error:', error);
+            
+            purchaseBtn.disabled = false;
+            purchaseBtn.textContent = '🎰 購入 PURCHASE';
+        });
+    });
+</script>
+{% endblock %}

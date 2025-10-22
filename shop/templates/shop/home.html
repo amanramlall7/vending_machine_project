@@ -1,0 +1,318 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}🌸 Home - Sakura Vending Machine{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Vending machine background */
+    body {
+        background-image: url('{% static "shop/images/vending-bg.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    
+    .hero-section {
+        text-align: center;
+        padding: 5rem 3rem;
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.35) 0%, rgba(255, 212, 229, 0.25) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: 40px;
+        border: 4px solid var(--sakura-pink);
+        box-shadow: 
+            0 0 50px rgba(255, 183, 197, 0.5),
+            inset 0 0 80px rgba(255, 183, 197, 0.1);
+        margin-top: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '🌸';
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        font-size: 4rem;
+        opacity: 0.2;
+        animation: float 4s ease-in-out infinite;
+    }
+    
+    .hero-section::after {
+        content: '🌸';
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        font-size: 4rem;
+        opacity: 0.2;
+        animation: float 4s ease-in-out infinite 2s;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-25px) rotate(15deg); }
+    }
+    
+    .hero-title {
+        font-family: 'Noto Serif JP', serif;
+        font-size: 4rem;
+        color: var(--sakura-pink);
+        text-shadow: 
+            0 0 25px rgba(255, 183, 197, 1),
+            0 0 50px rgba(255, 105, 180, 0.6),
+            3px 3px 6px rgba(0, 0, 0, 0.4);
+        margin-bottom: 1.5rem;
+        font-weight: 900;
+        letter-spacing: 4px;
+        animation: glow 3s ease-in-out infinite;
+    }
+    
+    @keyframes glow {
+        0%, 100% { text-shadow: 0 0 25px rgba(255, 183, 197, 1), 0 0 50px rgba(255, 105, 180, 0.6); }
+        50% { text-shadow: 0 0 35px rgba(255, 183, 197, 1), 0 0 70px rgba(255, 105, 180, 0.8); }
+    }
+    
+    .hero-subtitle {
+        font-size: 1.6rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        line-height: 1.8;
+    }
+    
+    .hero-description {
+        color: var(--sakura-light);
+        font-size: 1.2rem;
+        margin-bottom: 3rem;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        font-weight: 600;
+    }
+    
+    .hero-buttons {
+        display: flex;
+        gap: 2.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 1.5rem 3.5rem;
+        font-size: 1.3rem;
+        font-weight: bold;
+        text-decoration: none;
+        border: 4px solid;
+        border-radius: 50px;
+        transition: all 0.4s ease;
+        letter-spacing: 2px;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+    }
+    
+    .btn::before {
+        content: '🌸';
+        position: absolute;
+        top: 50%;
+        left: -40px;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        transition: all 0.4s ease;
+    }
+    
+    .btn:hover::before {
+        left: 25px;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transition: width 0.6s, height 0.6s;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+    }
+    
+    .btn:hover::after {
+        width: 400px;
+        height: 400px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%);
+        border-color: var(--sakura-pink);
+        color: white;
+        box-shadow: 0 8px 25px rgba(255, 183, 197, 0.5);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-8px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(255, 183, 197, 0.7);
+        background: linear-gradient(135deg, var(--sakura-dark) 0%, var(--sakura-deep) 100%);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, rgba(255, 212, 229, 0.4) 0%, rgba(255, 183, 197, 0.4) 100%);
+        border-color: var(--sakura-light);
+        color: white;
+        box-shadow: 0 8px 25px rgba(255, 212, 229, 0.4);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .btn-secondary:hover {
+        transform: translateY(-8px) scale(1.05);
+        background: linear-gradient(135deg, var(--sakura-light) 0%, var(--sakura-pink) 100%);
+        color: var(--navy-blue);
+        box-shadow: 0 15px 40px rgba(255, 212, 229, 0.7);
+    }
+    
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2.5rem;
+        margin-top: 5rem;
+    }
+    
+    .feature-card {
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.3) 0%, rgba(255, 212, 229, 0.2) 100%);
+        backdrop-filter: blur(20px);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 30px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    
+    .feature-card::before {
+        content: '🌸';
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        font-size: 8rem;
+        opacity: 0.08;
+        transform: rotate(20deg);
+        transition: all 0.4s ease;
+    }
+    
+    .feature-card:hover::before {
+        transform: rotate(35deg) scale(1.2);
+        opacity: 0.15;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-15px) scale(1.03);
+        box-shadow: 0 20px 50px rgba(255, 183, 197, 0.5);
+        border-color: var(--sakura-dark);
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.4) 0%, rgba(255, 212, 229, 0.3) 100%);
+    }
+    
+    .feature-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        filter: drop-shadow(0 0 20px rgba(255, 183, 197, 0.7));
+        animation: bounce 2.5s ease-in-out infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+    
+    .feature-card:nth-child(1) .feature-icon { animation-delay: 0s; }
+    .feature-card:nth-child(2) .feature-icon { animation-delay: 0.6s; }
+    .feature-card:nth-child(3) .feature-icon { animation-delay: 1.2s; }
+    .feature-card:nth-child(4) .feature-icon { animation-delay: 1.8s; }
+    
+    .feature-title {
+        color: var(--sakura-pink);
+        font-size: 1.6rem;
+        font-weight: 900;
+        margin-bottom: 1.2rem;
+        font-family: 'Noto Serif JP', serif;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        letter-spacing: 2px;
+    }
+    
+    .feature-desc {
+        color: white;
+        line-height: 2;
+        font-size: 1.05rem;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+        font-weight: 500;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+        
+        .btn {
+            padding: 1.2rem 2.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .features {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <h1 class="hero-title">Welcome!</h1>
+    <p class="hero-subtitle">
+        Welcome to our vending machine portal.<br>
+        Please explore and enjoy a seamless shopping experience!
+    </p>
+    <p class="hero-description">
+        Step into a fusion of traditional Japanese convenience and modern retro aesthetics!
+    </p>
+    <div class="hero-buttons">
+        <a href="{% url 'vending_machine' %}" class="btn btn-primary">🎰 Start Vending</a>
+        <a href="{% url 'purchase_history' %}" class="btn btn-secondary">📜 View History</a>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <div class="feature-icon">🍰</div>
+        <h3 class="feature-title">Delicious Snacks</h3>
+        <p class="feature-desc">Choose from a variety of sweet treats including Pocky, Taiyaki, and traditional Japanese snacks!</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">🥤</div>
+        <h3 class="feature-title">Refreshing Drinks</h3>
+        <p class="feature-desc">Cool down with Ramune, Calpico, and other refreshing Japanese beverages.</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <h3 class="feature-title">Easy Payment</h3>
+        <p class="feature-desc">Multiple payment options accepted including coins and notes for your convenience.</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 class="feature-title">Instant Service</h3>
+        <p class="feature-desc">Fast and efficient vending with automatic change calculation.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,741 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Admin Panel - Sakura Vending Machine{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        position: relative;
+        z-index: 5;
+    }
+    
+    .admin-title {
+        font-family: 'Noto Serif JP', serif;
+        font-size: 3rem;
+        color: var(--sakura-pink);
+        text-shadow: 
+            0 0 25px rgba(255, 183, 197, 1),
+            0 0 50px rgba(255, 105, 180, 0.6),
+            3px 3px 6px rgba(0, 0, 0, 0.4);
+        margin-bottom: 2rem;
+        font-weight: 900;
+        letter-spacing: 3px;
+        text-align: center;
+        animation: glow 3s ease-in-out infinite;
+    }
+    
+    @keyframes glow {
+        0%, 100% { text-shadow: 0 0 25px rgba(255, 183, 197, 1), 0 0 50px rgba(255, 105, 180, 0.6); }
+        50% { text-shadow: 0 0 35px rgba(255, 183, 197, 1), 0 0 70px rgba(255, 105, 180, 0.8); }
+    }
+    
+    .admin-card {
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.35) 0%, rgba(255, 212, 229, 0.25) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        border: 4px solid var(--sakura-pink);
+        box-shadow: 
+            0 0 50px rgba(255, 183, 197, 0.5),
+            inset 0 0 80px rgba(255, 183, 197, 0.1);
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-card::before {
+        content: '🌸';
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 2.5rem;
+        opacity: 0.2;
+        animation: float 4s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(15deg); }
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%) !important;
+        border-bottom: 3px solid var(--sakura-light);
+        padding: 1.5rem 2rem;
+        border-radius: 20px 20px 0 0 !important;
+    }
+    
+    .card-header h4 {
+        font-family: 'Noto Serif JP', serif;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        margin: 0;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+    
+    /* Enhanced Form Styling */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .form-label {
+        font-weight: 700;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-label::before {
+        content: '🌸';
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    .form-control {
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid var(--sakura-light);
+        border-radius: 15px;
+        padding: 1rem 1.25rem;
+        color: var(--navy-blue);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: var(--sakura-pink);
+        box-shadow: 
+            0 0 0 0.25rem rgba(255, 183, 197, 0.5),
+            inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        color: var(--navy-blue);
+        transform: translateY(-2px);
+    }
+    
+    .file-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-input-label {
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        text-align: center;
+        border: 2px solid var(--sakura-pink);
+        box-shadow: 0 4px 15px rgba(255, 183, 197, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .file-input-label:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 183, 197, 0.6);
+        background: linear-gradient(135deg, var(--sakura-dark) 0%, var(--sakura-deep) 100%);
+    }
+    
+    .file-name {
+        color: var(--sakura-light);
+        font-style: italic;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--sakura-light);
+    }
+    
+    .admin-btn {
+        padding: 1rem 2.5rem;
+        font-weight: bold;
+        border-radius: 50px;
+        border: 3px solid;
+        transition: all 0.4s ease;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        font-size: 1.1rem;
+    }
+    
+    .admin-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transition: width 0.6s, height 0.6s;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+    }
+    
+    .admin-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%);
+        border-color: var(--sakura-pink);
+        color: white;
+        box-shadow: 0 8px 25px rgba(255, 183, 197, 0.5);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-success:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(255, 183, 197, 0.7);
+        background: linear-gradient(135deg, var(--sakura-dark) 0%, var(--sakura-deep) 100%);
+        color: white;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid rgba(255, 183, 197, 0.3);
+    }
+    
+    /* Enhanced Table Styling */
+    .products-table {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .products-table thead th {
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem 1rem;
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        letter-spacing: 1px;
+        font-size: 1rem;
+        position: relative;
+    }
+    
+    .products-table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 10%;
+        width: 80%;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.5);
+    }
+    
+    .products-table tbody td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+        border-bottom: 2px solid rgba(255, 183, 197, 0.2);
+        color: var(--navy-blue);
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .products-table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .products-table tbody tr:nth-child(even) {
+        background-color: rgba(255, 212, 229, 0.15);
+    }
+    
+    .products-table tbody tr:hover {
+        background-color: rgba(255, 183, 197, 0.25);
+        transform: translateX(5px);
+    }
+    
+    .products-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Specific Column Styling */
+    .product-id {
+        font-weight: 700;
+        color: var(--sakura-deep);
+        font-size: 1.1rem;
+    }
+    
+    .product-image {
+        padding: 0.75rem;
+    }
+    
+    .no-image {
+        background: linear-gradient(135deg, var(--sakura-light) 0%, var(--sakura-pink) 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(255, 183, 197, 0.3);
+    }
+    
+    .product-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--navy-blue);
+    }
+    
+    .product-category {
+        background: rgba(255, 183, 197, 0.2);
+        color: var(--sakura-deep);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 2px solid var(--sakura-light);
+    }
+    
+    .product-price {
+        font-weight: 700;
+        color: #22c55e;
+        font-size: 1.1rem;
+    }
+    
+    .product-price::before {
+        content: 'Rs';
+        margin-right: 2px;
+        opacity: 0.8;
+    }
+    
+    .product-quantity {
+        font-weight: 600;
+        color: var(--navy-blue);
+        position: relative;
+    }
+    
+    .quantity-badge {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .availability-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .available {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+    }
+    
+    .out-of-stock {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .actions-container {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        padding: 0.75rem 1.25rem;
+        font-weight: 600;
+        border-radius: 15px;
+        border: 2px solid;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        min-width: 80px;
+        justify-content: center;
+    }
+    
+    .save-btn {
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%);
+        border-color: var(--sakura-pink);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 183, 197, 0.4);
+    }
+    
+    .save-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(255, 183, 197, 0.6);
+        background: linear-gradient(135deg, var(--sakura-dark) 0%, var(--sakura-deep) 100%);
+    }
+    
+    .delete-btn {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border-color: #ef4444;
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+    
+    .delete-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+    
+    .table-responsive {
+        border-radius: 20px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--sakura-light);
+    }
+    
+    .empty-state .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.7;
+    }
+    
+    .empty-state h3 {
+        font-family: 'Noto Serif JP', serif;
+        color: var(--sakura-pink);
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .products-table thead th,
+        .products-table tbody td {
+            padding: 1rem 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        .action-btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            min-width: 70px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .admin-title {
+            font-size: 2.2rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .table-responsive {
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+        
+        .actions-container {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            min-width: 100%;
+        }
+        
+        .form-actions {
+            justify-content: center;
+        }
+        
+        .file-input-wrapper {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h1 class="admin-title">🧃Admin Panel</h1>
+
+    <!-- Add Product Form -->
+    <div class="admin-card mb-5 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">🌸 Add New Product</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'add_product' %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Product Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="Enter product name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price" class="form-label">Price (Rs)</label>
+                        <input type="number" step="0.01" name="price" class="form-control" placeholder="0.00" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantity" class="form-label">Quantity</label>
+                        <input type="number" name="quantity" class="form-control" placeholder="0" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" name="category" class="form-control" placeholder="Snacks / Drinks / etc.">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="image" class="form-label">Product Image</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" name="image" id="image" class="form-control">
+                            <label for="image" class="file-input-label">
+                                📷 Choose File
+                            </label>
+                            <span class="file-name" id="file-name">No file chosen</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="admin-btn btn-success">
+                        ➕ Add Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Current Products -->
+    <div class="admin-card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">📦 Current Products</h4>
+        </div>
+        <div class="card-body">
+            {% if products %}
+            <div class="table-responsive">
+                <table class="products-table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Available</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr class="text-center">
+                            <td class="product-id">{{ product.id }}</td>
+                            <td class="product-image">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}" width="60" height="60" class="rounded">
+                                {% else %}
+                                    <span class="no-image">No Image</span>
+                                {% endif %}
+                            </td>
+                            <td class="product-name">{{ product.name }}</td>
+                            <td>
+                                <span class="product-category">{{ product.category }}</span>
+                            </td>
+                            <td class="product-price">{{ product.price }}</td>
+                            <td class="product-quantity">
+                                <span class="quantity-badge">{{ product.quantity }}</span>
+                            </td>
+                            <td>
+                                {% if product.quantity > 0 %}
+                                    <span class="availability-badge available">Available</span>
+                                {% else %}
+                                    <span class="availability-badge out-of-stock">Out of Stock</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="actions-container">
+                                    <!-- Update Form -->
+                                    <form method="POST" action="{% url 'update_product' product.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <div style="margin-bottom: 10px;">
+                                            <input type="number" step="0.01" name="price" value="{{ product.price }}" class="form-control form-control-sm text-center" style="width: 100px; display: inline-block;">
+                                        </div>
+                                        <div style="margin-bottom: 10px;">
+                                            <input type="number" name="quantity" value="{{ product.quantity }}" class="form-control form-control-sm text-center" style="width: 100px; display: inline-block;">
+                                        </div>
+                                        <button type="submit" class="action-btn save-btn">
+                                            💾 Save
+                                        </button>
+                                    </form>
+                                    <!-- Delete Form -->
+                                    <form method="POST" action="{% url 'delete_product' product.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete {{ product.name }}?')">
+                                            🗑️ Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="icon">🌸</div>
+                <h3>No Products Available</h3>
+                <p>Start by adding your first product to the inventory.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // File input display
+    document.getElementById('image').addEventListener('change', function(e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+        document.getElementById('file-name').textContent = fileName;
+    });
+
+    // Add interactive animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableRows = document.querySelectorAll('.products-table tbody tr');
+        
+        tableRows.forEach((row, index) => {
+            // Add staggered animation
+            row.style.animationDelay = `${index * 0.1}s`;
+            row.classList.add('fade-in');
+            
+            // Add click effects to buttons
+            const buttons = row.querySelectorAll('.action-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Add ripple effect
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.6);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+    });
+</script>
+
+<style>
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

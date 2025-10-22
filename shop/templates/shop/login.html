@@ -1,0 +1,232 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}🌸 ログイン - Admin Login{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-image: url('{% static "shop/images/vending-bg.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    
+    .login-container {
+        max-width: 550px;
+        margin: 4rem auto;
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.3) 0%, rgba(255, 212, 229, 0.2) 100%);
+        border: 4px solid var(--sakura-pink);
+        border-radius: 35px;
+        padding: 4rem 3rem;
+        backdrop-filter: blur(25px);
+        box-shadow: 
+            0 0 50px rgba(255, 183, 197, 0.5),
+            inset 0 0 80px rgba(255, 183, 197, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-container::before {
+        content: '🌸';
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        font-size: 8rem;
+        opacity: 0.1;
+        animation: rotate 20s linear infinite;
+    }
+    
+    .login-container::after {
+        content: '🌸';
+        position: absolute;
+        bottom: -20px;
+        right: -20px;
+        font-size: 8rem;
+        opacity: 0.1;
+        animation: rotate 20s linear infinite reverse;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .login-title {
+        font-family: 'Noto Serif JP', serif;
+        color: var(--sakura-pink);
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        text-shadow: 
+            0 0 20px rgba(255, 183, 197, 1),
+            0 0 40px rgba(255, 105, 180, 0.6);
+        font-weight: 900;
+        letter-spacing: 3px;
+    }
+    
+    .login-subtitle {
+        text-align: center;
+        color: white;
+        font-size: 1.3rem;
+        margin-bottom: 3rem;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        font-weight: 600;
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    
+    .form-group label {
+        display: block;
+        color: var(--sakura-pink);
+        font-weight: bold;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 1.2rem 1.5rem;
+        background: rgba(26, 26, 62, 0.8);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 15px;
+        color: white;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--sakura-dark);
+        box-shadow: 0 0 25px rgba(255, 183, 197, 0.5);
+        background: rgba(26, 26, 62, 0.9);
+    }
+    
+    .btn-login {
+        width: 100%;
+        padding: 1.3rem;
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 15px;
+        color: white;
+        font-size: 1.3rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        letter-spacing: 2px;
+        margin-top: 1.5rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-login::before {
+        content: '🌸';
+        position: absolute;
+        top: 50%;
+        left: -40px;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        transition: all 0.4s ease;
+    }
+    
+    .btn-login:hover::before {
+        left: 30px;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(255, 183, 197, 0.6);
+        background: linear-gradient(135deg, var(--sakura-dark) 0%, var(--sakura-deep) 100%);
+    }
+    
+    .info-box {
+        background: rgba(255, 183, 197, 0.15);
+        border: 2px solid var(--sakura-pink);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-top: 2.5rem;
+        text-align: center;
+        backdrop-filter: blur(10px);
+    }
+    
+    .info-box p {
+        color: white;
+        margin: 0.8rem 0;
+        font-size: 1rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .info-box strong {
+        color: var(--sakura-pink);
+        font-size: 1.1rem;
+    }
+    
+    .info-box code {
+        background: rgba(26, 26, 62, 0.8);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        display: inline-block;
+        margin-top: 0.5rem;
+        font-family: 'Courier New', monospace;
+        color: var(--sakura-pink);
+    }
+    
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 2rem;
+        color: var(--sakura-light);
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .back-link:hover {
+        color: var(--sakura-pink);
+        text-shadow: 0 0 15px rgba(255, 183, 197, 0.8);
+        transform: translateX(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h1 class="login-title">🔐 管理者</h1>
+    <p class="login-subtitle">Admin Login</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_username">👤 ユーザー名 Username</label>
+            <input type="text" name="username" id="id_username" class="form-control clickable" placeholder="Enter username" required autofocus data-note="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="id_password">🔑 パスワード Password</label>
+            <input type="password" name="password" id="id_password" class="form-control clickable" placeholder="Enter password" required data-note="1">
+        </div>
+        
+        <button type="submit" class="btn-login clickable" data-note="2">🚀 ログイン LOGIN</button>
+    </form>
+    
+    <div class="info-box">
+        <p><strong>📝 初めての方</strong></p>
+        <p>Create a superuser account using:</p>
+        <code>python manage.py createsuperuser</code>
+    </div>
+    
+    <a href="{% url 'home' %}" class="back-link clickable" data-note="3">🌸 ← ホームへ戻る Back to Home</a>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: vending-machine-project
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py migrate && gunicorn vending_machine.wsgi

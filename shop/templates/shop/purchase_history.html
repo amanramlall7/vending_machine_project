@@ -1,0 +1,232 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}🌸 購入履歴 - Purchase History{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-image: url('{% static "shop/images/vending-bg.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    
+    .history-container {
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.25) 0%, rgba(255, 212, 229, 0.15) 100%);
+        border: 4px solid var(--sakura-pink);
+        border-radius: 35px;
+        padding: 3rem;
+        margin-top: 2rem;
+        backdrop-filter: blur(25px);
+        box-shadow: 0 0 50px rgba(255, 183, 197, 0.4);
+    }
+    
+    .history-title {
+        font-family: 'Noto Serif JP', serif;
+        color: var(--sakura-pink);
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 3rem;
+        text-shadow: 0 0 25px rgba(255, 183, 197, 0.8);
+        font-weight: 900;
+        letter-spacing: 3px;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        border-radius: 20px;
+        background: rgba(26, 26, 62, 0.4);
+        backdrop-filter: blur(15px);
+        padding: 1.5rem;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 1rem;
+    }
+    
+    thead {
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.3) 0%, rgba(255, 212, 229, 0.2) 100%);
+    }
+    
+    th {
+        padding: 1.3rem 1rem;
+        color: var(--sakura-pink);
+        font-weight: bold;
+        text-transform: uppercase;
+        border: 2px solid var(--sakura-pink);
+        text-align: center;
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    th:first-child {
+        border-top-left-radius: 15px;
+    }
+    
+    th:last-child {
+        border-top-right-radius: 15px;
+    }
+    
+    td {
+        padding: 1.2rem 1rem;
+        color: white;
+        border: 1px solid rgba(255, 183, 197, 0.2);
+        text-align: center;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    tbody tr {
+        transition: all 0.3s ease;
+        background: rgba(26, 26, 62, 0.3);
+    }
+    
+    tbody tr:hover {
+        background: rgba(255, 183, 197, 0.2);
+        transform: scale(1.02);
+        box-shadow: 0 5px 20px rgba(255, 183, 197, 0.3);
+    }
+    
+    .price-cell {
+        color: var(--sakura-pink);
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .change-cell {
+        color: var(--sakura-light);
+        font-weight: bold;
+    }
+    
+    .stock-cell {
+        color: var(--sakura-dark);
+        font-weight: bold;
+    }
+    
+    .date-cell {
+        color: var(--sakura-light);
+        font-size: 0.9rem;
+    }
+    
+    .no-transactions {
+        text-align: center;
+        padding: 4rem;
+        color: white;
+        font-size: 1.3rem;
+    }
+    
+    .no-transactions .emoji {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        filter: drop-shadow(0 0 20px rgba(255, 183, 197, 0.5));
+    }
+    
+    .no-transactions p {
+        color: var(--sakura-pink);
+        font-weight: bold;
+        margin-top: 1.5rem;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+    
+    .back-btn-container {
+        text-align: center;
+        margin-top: 3rem;
+    }
+    
+    .back-btn {
+        display: inline-block;
+        padding: 1.2rem 3rem;
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.3) 0%, rgba(255, 212, 229, 0.2) 100%);
+        border: 3px solid var(--sakura-pink);
+        border-radius: 30px;
+        color: var(--sakura-light);
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .back-btn:hover {
+        transform: translateY(-5px);
+        background: linear-gradient(135deg, var(--sakura-pink) 0%, var(--sakura-dark) 100%);
+        color: white;
+        box-shadow: 0 10px 30px rgba(255, 183, 197, 0.5);
+    }
+    
+    /* Scrollbar styling */
+    .table-container::-webkit-scrollbar {
+        height: 10px;
+    }
+    
+    .table-container::-webkit-scrollbar-track {
+        background: rgba(26, 26, 62, 0.5);
+        border-radius: 10px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb {
+        background: var(--sakura-pink);
+        border-radius: 10px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: var(--sakura-dark);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <h1 class="history-title">📜 購入履歴 PURCHASE HISTORY 🌸</h1>
+    
+    {% if transactions %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>日時 Date/Time</th>
+                    <th>商品 Product</th>
+                    <th>数量 Qty</th>
+                    <th>合計 Total</th>
+                    <th>投入金額 Money</th>
+                    <th>お釣り Change</th>
+                    <th>残り在庫 Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trans in transactions %}
+                <tr class="clickable" data-note="{{ forloop.counter0 }}">
+                    <td>{{ trans.id }}</td>
+                    <td class="date-cell">{{ trans.transaction_date|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ trans.product.name }}</td>
+                    <td>{{ trans.quantity }}</td>
+                    <td class="price-cell">Rs {{ trans.total_price }}</td>
+                    <td>Rs {{ trans.money_inserted }}</td>
+                    <td class="change-cell">Rs {{ trans.change_returned }}</td>
+                    <td class="stock-cell">{{ trans.stock_after }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-transactions">
+        <div class="emoji">🌸</div>
+        <h2 style="color: var(--sakura-pink); font-family: 'Noto Serif JP', serif;">取引履歴がありません</h2>
+        <p>No transactions yet</p>
+        <p style="font-size: 1rem; margin-top: 1rem;">Start using the vending machine to see your purchase history here!</p>
+    </div>
+    {% endif %}
+    
+    <div class="back-btn-container">
+        <a href="{% url 'vending_machine' %}" class="back-btn clickable" data-note="0">
+            🌸 ← 自動販売機へ戻る Back to Vending
+        </a>
+    </div>
+</div>
+{% endblock %}
