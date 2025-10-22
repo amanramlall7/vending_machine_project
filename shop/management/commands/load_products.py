@@ -10,28 +10,27 @@ class Command(BaseCommand):
         
         # Cakes data (with Japanese snacks)
         cakes = [
-            (41, "Sando", 15, 10),
-            (42, "Biscrem", 25, 10),
-            (43, "Pocky (Strawberry)", 30, 10),  # Traditional Japanese snack
-            (44, "Taiyaki (Red Bean)", 35, 10),  # Traditional Japanese fish-shaped cake
-            (45, "M&Ms", 50, 10),
-            (46, "Motto", 23, 10),
+            ("Sando", 15, 10),
+            ("Biscrem", 25, 10),
+            ("Pocky (Strawberry)", 30, 10),  # Traditional Japanese snack
+            ("Taiyaki (Red Bean)", 35, 10),  # Traditional Japanese fish-shaped cake
+            ("M&Ms", 50, 10),
+            ("Motto", 23, 10),
         ]
         
         # Drinks data (with Japanese drinks)
         drinks = [
-            (51, "Ramune (Original)", 55, 10),  # Traditional Japanese marble soda
-            (52, "Calpico (Calpis)", 50, 10),   # Traditional Japanese drink
-            (53, "Mirinda (raspberry)", 45, 10),
-            (54, "Water", 25, 10),
-            (55, "Sparkling Water (Vital)", 40, 10),
-            (56, "Coca Cola", 45, 10),
+            ("Ramune (Original)", 55, 10),  # Traditional Japanese marble soda
+            ("Calpico (Calpis)", 50, 10),   # Traditional Japanese drink
+            ("Mirinda (raspberry)", 45, 10),
+            ("Water", 25, 10),
+            ("Sparkling Water (Vital)", 40, 10),
+            ("Coca Cola", 45, 10),
         ]
         
         # Create cake products
-        for product_id, name, price, quantity in cakes:
+        for name, price, quantity in cakes:
             Product.objects.create(
-                product_id=product_id,
                 name=name,
                 price=price,
                 quantity=quantity,
@@ -40,9 +39,8 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Created cake: {name}'))
         
         # Create drink products
-        for product_id, name, price, quantity in drinks:
+        for name, price, quantity in drinks:
             Product.objects.create(
-                product_id=product_id,
                 name=name,
                 price=price,
                 quantity=quantity,

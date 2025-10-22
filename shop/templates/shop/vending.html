@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <style>
+    /* Your existing CSS remains the same */
     body {
         background-image: url('{% static "shop/images/vending-bg.jpg" %}');
         background-size: cover;
@@ -302,12 +303,11 @@
         <div class="products-grid">
             {% for product in cakes %}
             <div class="product-card {% if not product.is_available %}out-of-stock{% endif %}" 
-                 data-id="{{ product.product_id }}"
+                 data-id="{{ product.id }}"
                  data-name="{{ product.name }}"
                  data-price="{{ product.price }}"
-                 data-stock="{{ product.quantity }}"
-                 data-note="{{ forloop.counter0 }}">
-                <span class="product-id">{{ product.product_id }}</span>
+                 data-stock="{{ product.quantity }}">
+                <span class="product-id">{{ product.id }}</span>
                 <div class="product-icon">🍰</div>
                 <div class="product-name">{{ product.name }}</div>
                 <div class="product-price">Rs {{ product.price }}</div>
@@ -320,12 +320,11 @@
         <div class="products-grid">
             {% for product in drinks %}
             <div class="product-card {% if not product.is_available %}out-of-stock{% endif %}"
-                 data-id="{{ product.product_id }}"
+                 data-id="{{ product.id }}"
                  data-name="{{ product.name }}"
                  data-price="{{ product.price }}"
-                 data-stock="{{ product.quantity }}"
-                 data-note="{{ forloop.counter0 }}">
-                <span class="product-id">{{ product.product_id }}</span>
+                 data-stock="{{ product.quantity }}">
+                <span class="product-id">{{ product.id }}</span>
                 <div class="product-icon">🥤</div>
                 <div class="product-name">{{ product.name }}</div>
                 <div class="product-price">Rs {{ product.price }}</div>
@@ -350,20 +349,20 @@
             
             <div class="form-group">
                 <label>💰 お金を入れる Insert Money (Rs)</label>
-                <input type="number" class="form-control" id="moneyInserted" name="money_inserted" placeholder="金額を入力" required>
+                <input type="number" class="form-control" id="moneyInserted" name="money_inserted" placeholder="金額を入力" min="1" required>
                 <div class="denomination-grid">
                     {% for denom in valid_denominations %}
-                    <button type="button" class="denom-btn clickable" data-value="{{ denom }}" data-note="{{ forloop.counter0 }}">Rs {{ denom }}</button>
+                    <button type="button" class="denom-btn" data-value="{{ denom }}">Rs {{ denom }}</button>
                     {% endfor %}
                 </div>
             </div>
             
             <div class="form-group">
                 <label>📦 数量 Quantity</label>
-                <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" max="10" required>
             </div>
             
-            <button type="submit" class="btn-vending clickable" id="purchaseBtn" data-note="4" disabled>🎰 購入 PURCHASE</button>
+            <button type="submit" class="btn-vending" id="purchaseBtn" disabled>🎰 購入 PURCHASE</button>
         </form>
     </div>
 </div>
@@ -417,17 +416,38 @@
     
     // Denomination buttons
     document.querySelectorAll('.denom-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent form submission
             moneyInput.value = this.dataset.value;
         });
     });
     
-    // Form submission
+    // Form submission with validation
     vendingForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         if (!selectedProduct) {
             alert('商品を選んでください！ Please select a product!');
+            return;
+        }
+        
+        // Client-side validation
+        const moneyValue = moneyInput.value.trim();
+        const quantityValue = quantityInput.value.trim();
+        const productIdValue = productIdInput.value.trim();
+        
+        if (!moneyValue || !quantityValue || !productIdValue) {
+            alert('すべてのフィールドを入力してください！ Please fill all fields!');
+            return;
+        }
+        
+        if (isNaN(moneyValue) || moneyValue <= 0) {
+            alert('有効な金額を入力してください！ Please enter valid money amount!');
+            return;
+        }
+        
+        if (isNaN(quantityValue) || quantityValue <= 0 || quantityValue > 10) {
+            alert('有効な数量を入力してください (1-10)! Please enter valid quantity (1-10)!');
             return;
         }
         
@@ -442,7 +462,12 @@
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             clearDisplay();
             
@@ -473,16 +498,17 @@
                 }
                 
                 // Reset form
-                moneyInput.value = '';
-                quantityInput.value = 1;
-                selectedProduct = null;
-                productIdInput.value = '';
-                document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
-                
                 setTimeout(() => {
+                    moneyInput.value = '';
+                    quantityInput.value = 1;
+                    selectedProduct = null;
+                    productIdInput.value = '';
+                    document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+                    purchaseBtn.disabled = true;
+                    
                     addDisplayLine('別の商品を選ぶか終了');
                     addDisplayLine('Select another or exit');
-                }, 1000);
+                }, 2000);
             } else {
                 addDisplayLine('✗ 購入失敗 FAILED');
                 addDisplayLine(data.message);
@@ -500,6 +526,17 @@
             purchaseBtn.disabled = false;
             purchaseBtn.textContent = '🎰 購入 PURCHASE';
         });
+    });
+    
+    // Additional validation on input changes
+    moneyInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    
+    quantityInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        if (this.value > 10) this.value = 10;
+        if (this.value < 1) this.value = 1;
     });
 </script>
 {% endblock %}
