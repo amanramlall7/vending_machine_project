@@ -290,7 +290,8 @@
             <ul class="nav-links">
                 <li><a href="{% url 'home' %}">🏠 Home</a></li>
                 {% if user.is_staff %}
-                <li><a href="{% url 'admin_panel' %}">⚙️ Admin</a></li>
+                <li><a href="{% url 'admin_panel' %}">⚙️ Admin Panel</a></li>
+                <li><a href="https://vending-machine-project.onrender.com/admin/" target="_blank">🔧 Django Admin</a></li>
                 <li><a href="{% url 'admin_logout' %}">🚪 Logout</a></li>
                 {% else %}
                 <li><a href="{% url 'admin_login' %}">🔐 Login</a></li>
