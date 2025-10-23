@@ -7,7 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login, logout, authenticate
 from decimal import Decimal, InvalidOperation
 
-VALID_DENOMINATIONS = [1, 5, 10, 20, 25, 50, 100]
+VALID_DENOMINATIONS = [1, 5, 10, 20, 25, 50, 100,200]
 
 # Landing page
 def home(request):
